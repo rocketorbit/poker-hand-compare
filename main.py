@@ -29,84 +29,65 @@ def straight_flush_rank(hand: list[str]) -> int:
         numbers.append(int(card[1:]))
     numbers.sort(reverse = True)
     if numbers == [14, 5, 4, 3, 2]: return 283469561876480
-    last = numbers[0]
-    for number in numbers[1:]:
-        if number != last - 1: return 0
-        last -= 1
     return numbers[0] * (14 ** 12)
 
 def four_rank(hand: list[str]) -> int:
     numbers = []
     for card in hand:
         numbers.append(int(card[1:]))
-    number_count = {}
+    number_count = [0] * 15
     for number in numbers:
-        if number in number_count.keys():
-            number_count[number] += 1
-        else:
-            number_count[number] = 1
-    high_number, low_number = 0, 0
-    for number, count in number_count.items():
-        if count != 4 and count != 1: return 0
-        if count == 4: high_number += number
-        if count == 1: low_number += number
-    if high_number == 0: return 0
-    return high_number * (14 ** 11) + low_number
+        number_count[number] += 1
+    four_number, kicker = 0, 0
+    for number, count in enumerate(number_count):
+        if count != 4 and count != 1: continue
+        if count == 4: four_number += number
+        if count == 1: kicker += number
+    if four_number == 0 or kicker == 0: return 0
+    return four_number * (14 ** 11) + kicker
 
 def full_rank(hand: list[str]) -> int:
     numbers = []
     for card in hand:
         numbers.append(int(card[1:]))
-    number_count = {}
+    number_count = [0] * 15
     for number in numbers:
-        if number in number_count.keys():
-            number_count[number] += 1
-        else:
-            number_count[number] = 1
-    high_number, low_number = 0, 0
-    for number, count in number_count.items():
-        if count != 3 and count != 2: return 0
-        if count == 3: high_number += number
-        if count == 2: low_number += number
-    return high_number * (14 ** 10) + low_number
+        number_count[number] += 1
+    three_number, pair_number = 0, 0
+    for number, count in enumerate(number_count):
+        if count == 3: three_number += number
+        if count == 2: pair_number += number
+    if three_number == 0 or pair_number == 0: return 0
+    return three_number * (14 ** 10) + pair_number
 
 def three_rank(hand: list[str]) -> int:
     numbers = []
     for card in hand:
         numbers.append(int(card[1:]))
-    number_count = {}
+    number_count = [0] * 15
     for number in numbers:
-        if number in number_count.keys():
-            number_count[number] += 1
-        else:
-            number_count[number] = 1
+        number_count[number] += 1
     three_number, high_number, low_number = 0, 0, 0
-    for number, count in number_count.items():
-        if count != 3 and count != 1: return 0
+    for number, count in enumerate(number_count):
         if count == 3: three_number += number
         if count == 1:
             if low_number == 0:
                 low_number += number
-            elif low_number < number:
-                high_number += number
             else:
-                low_number, high_number = number, low_number
-    if 0 in [three_number, high_number, low_number]: return 0
+                high_number += number
+    if low_number > high_number: low_number, high_number = high_number, low_number
+    if three_number == 0 or high_number == 0 or low_number == 0: return 0
     return three_number * (14 ** 7) + high_number * 14 + low_number
 
 def two_rank(hand: list[str]) -> int:
     numbers = []
     for card in hand:
         numbers.append(int(card[1:]))
-    number_count = {}
+    number_count = [0] * 15
     for number in numbers:
-        if number in number_count.keys():
-            number_count[number] += 1
-        else:
-            number_count[number] = 1
+        number_count[number] += 1
     high_pair, low_pair, kicker = 0, 0, 0
-    for number, count in number_count.items():
-        if count != 2 and count != 1: return 0
+    for number, count in enumerate(number_count):
         if count == 2:
             if low_pair == 0:
                 low_pair += number
@@ -114,26 +95,22 @@ def two_rank(hand: list[str]) -> int:
                 high_pair += number
         if count == 1: kicker += number
     if low_pair > high_pair: low_pair, high_pair = high_pair, low_pair
-    if 0 in [high_pair, low_pair, kicker]: return 0
+    if high_pair == 0 or low_pair == 0 or kicker == 0: return 0
     return high_pair * (14 ** 6) + low_pair * 14 + kicker
 
 def pair_rank(hand: list[str]) -> int:
     numbers = []
     for card in hand:
         numbers.append(int(card[1:]))
-    number_count = {}
+    number_count = [0] * 15
     for number in numbers:
-        if number in number_count.keys():
-            number_count[number] += 1
-        else:
-            number_count[number] = 1
+        number_count[number] += 1
     pair = 0
     kickers = []
-    for number, count in number_count.items():
-        if count != 2 and count != 1: return 0
+    for number, count in enumerate(number_count):
         if count == 2: pair += number
         if count == 1: kickers.append(number)
-    if pair == 0: return 0
+    if pair == 0 or len(kickers) != 3: return 0
     kickers.sort(reverse = True)
     return pair * (14 ** 5) + kickers[0] * (14 ** 2) + kickers[1] * 14 + kickers[2]
 
